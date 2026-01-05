@@ -1,10 +1,3 @@
-"""
-Application Streamlit - Projet CoinAfrique
-Master AI - DIT
-Auteur: Eudoxie
-Date: Janvier 2026
-"""
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -1236,6 +1229,8 @@ def page_dashboard():
     except Exception as e:
         render_error(f"Erreur: {str(e)}")
 
+
+
 # ============================================================================
 # PAGE 5: ÉVALUATION
 # ============================================================================
@@ -1245,154 +1240,138 @@ def page_evaluation():
     
     render_header("Évaluation", "Votre avis compte")
     
-    render_info("Cette évaluation est anonyme et nous aide à améliorer l'application.")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    with st.form("formulaire_evaluation", clear_on_submit=True):
-        
-        render_section("Informations")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            nom = st.text_input("Nom complet", placeholder="Jean Dupont")
-            email = st.text_input("Email", placeholder="jean@example.com")
-        
-        with col2:
-            organisation = st.text_input("Organisation", placeholder="DIT, Université...")
-            role = st.selectbox("Rôle", ["-- Sélectionner --", "Étudiant", "Enseignant", "Chercheur", "Professionnel", "Autre"])
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        render_section("Notes")
-        
-        st.caption("De 1 (Mauvais) à 5 (Excellent)")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            note_interface = st.slider("Interface", 1, 5, 3)
-            note_fonctions = st.slider("Fonctionnalités", 1, 5, 3)
-        
-        with col2:
-            note_perf = st.slider("Performance", 1, 5, 3)
-            note_global = st.slider("Note globale", 1, 5, 3)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        render_section("Commentaires")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            points_forts = st.text_area("Points forts", height=150)
-        
-        with col2:
-            ameliorations = st.text_area("Améliorations", height=150)
-        
-        commentaires = st.text_area("Autres commentaires", height=100)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1, 1, 1])
-        
-        with col2:
-            submitted = st.form_submit_button("Soumettre", type="primary", use_container_width=True)
-        
-        if submitted:
-            erreurs = []
-            
-            if not nom or len(nom) < 2:
-                erreurs.append("Nom requis")
-            if not email or '@' not in email:
-                erreurs.append("Email invalide")
-            if role == "-- Sélectionner --":
-                erreurs.append("Rôle requis")
-            
-            if erreurs:
-                for erreur in erreurs:
-                    render_error(erreur)
-            else:
-                eval_data = {
-                    'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    'nom': nom,
-                    'email': email,
-                    'organisation': organisation,
-                    'role': role,
-                    'note_interface': note_interface,
-                    'note_fonctions': note_fonctions,
-                    'note_perf': note_perf,
-                    'note_global': note_global,
-                    'points_forts': points_forts,
-                    'ameliorations': ameliorations,
-                    'commentaires': commentaires
-                }
-                
-                fichier_eval = "data/evaluations.csv"
-                
-                try:
-                    if os.path.exists(fichier_eval):
-                        df_eval = pd.read_csv(fichier_eval)
-                        df_eval = pd.concat([df_eval, pd.DataFrame([eval_data])], ignore_index=True)
-                    else:
-                        df_eval = pd.DataFrame([eval_data])
-                    
-                    df_eval.to_csv(fichier_eval, index=False, encoding='utf-8-sig')
-                    
-                    render_success("Merci pour votre évaluation!")
-                    st.balloons()
-                    
-                except Exception as e:
-                    render_error(f"Erreur: {str(e)}")
+    render_info(
+        "Votre feedback est essentiel pour améliorer cette application. "
+        "Prenez quelques minutes pour répondre au formulaire d'évaluation."
+    )
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
-    # Statistiques
-    fichier_eval = "data/evaluations.csv"
+    # Section principale avec le bouton KoboToolbox
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    if os.path.exists(fichier_eval):
-        try:
-            df_eval = pd.read_csv(fichier_eval)
-            
-            if len(df_eval) > 0:
-                with st.expander("Statistiques des évaluations", expanded=False):
-                    
-                    col1, col2, col3, col4 = st.columns(4)
-                    
-                    col1.metric("Total", len(df_eval))
-                    col2.metric("Note moyenne", f"{df_eval['note_global'].mean():.1f}/5")
-                    col3.metric("Interface", f"{df_eval['note_interface'].mean():.1f}/5")
-                    col4.metric("Fonctionnalités", f"{df_eval['note_fonctions'].mean():.1f}/5")
-                    
-                    notes_moyennes = {
-                        'Interface': df_eval['note_interface'].mean(),
-                        'Fonctionnalités': df_eval['note_fonctions'].mean(),
-                        'Performance': df_eval['note_perf'].mean(),
-                        'Global': df_eval['note_global'].mean()
-                    }
-                    
-                    fig = go.Figure(data=[
-                        go.Bar(
-                            x=list(notes_moyennes.keys()),
-                            y=list(notes_moyennes.values()),
-                            marker_color=['#2563eb', '#f97316', '#10b981', '#f59e0b']
-                        )
-                    ])
-                    
-                    fig.update_layout(
-                        title="Notes moyennes",
-                        yaxis_title="Note (/5)",
-                        yaxis_range=[0, 5],
-                        height=300,
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        paper_bgcolor='rgba(0,0,0,0)'
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 3rem 2rem; background: white; border-radius: 12px; 
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #e2e8f0;">
+            <h3 style="color: #1e293b; margin-bottom: 1rem;">📝 Formulaire d'évaluation</h3>
+            <p style="color: #64748b; margin-bottom: 2rem;">
+                Cliquez sur le bouton ci-dessous pour accéder au formulaire d'évaluation
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        except:
-            pass
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Bouton personnalisé avec lien externe
+        st.markdown("""
+        <style>
+        .kobo-button {
+            display: inline-block;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .kobo-button:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            color: white;
+            text-decoration: none;
+        }
+        </style>
+        <a href="https://ee.kobotoolbox.org/x/JCAyScvS" target="_blank" class="kobo-button">
+            Accéder au Formulaire d'Évaluation
+        </a>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="text-align: center; color: #64748b; font-size: 0.9rem;">
+            <p>Le formulaire s'ouvrira dans un nouvel onglet</p>
+            <p>⏱Temps estimé : 3-5 minutes</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    
+    # Section informations sur l'évaluation
+    render_section("Pourquoi évaluer ?")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="custom-card">
+            <h4>Amélioration continue</h4>
+            <p>Vos retours nous aident à identifier les points à améliorer</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="custom-card">
+            <h4>Développement futur</h4>
+            <p>Vos suggestions orientent les prochaines fonctionnalités</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="custom-card">
+            <h4>Communauté</h4>
+            <p>Participez à l'évolution de l'outil</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Section questions du formulaire
+    with st.expander("Aperçu des questions", expanded=False):
+        st.markdown("""
+        Le formulaire d'évaluation comprend les sections suivantes :
+        
+        **1. Informations générales**
+        - Nom, email, organisation
+        - Rôle (étudiant, enseignant, etc.)
+        
+        **2. Évaluation de l'application**
+        - Interface et design
+        - Fonctionnalités
+        - Performance
+        - Note globale
+        
+        **3. Retour qualitatif**
+        - Points forts de l'application
+        - Axes d'amélioration
+        - Suggestions de fonctionnalités
+        
+        **4. Utilisation**
+        - Contexte d'utilisation
+        - Recommandation
+        """)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Message de remerciement
+    render_info("""
+    <strong>Merci pour votre participation !</strong><br>
+    Votre évaluation est précieuse pour l'amélioration continue de cette application.
+    Toutes les réponses sont anonymes et confidentielles.
+    """)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    
 
 # ============================================================================
 # NAVIGATION
